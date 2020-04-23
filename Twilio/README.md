@@ -12,7 +12,7 @@ The `btoa` call is supported only from Zabbix 4.4.8rc1 and later versions.
 
 ### Usage
 
-Import the XML media type and configure it with your `SID`, `token` and `caller id` (See https://www.twilio.com/console )
+Import the [XML file](https://github.com/Simone-Zabberoni/zabbix-customization/blob/master/Twilio/zbx_export_mediatypes-twilio.xml) in the media type configuration page and configure it with your `SID`, `token` and `caller id` (See https://www.twilio.com/console )
 
 Then add a media for your users and specify the phone number to contact, including the prefix (i.e. for Italy: 39335123456).
 
