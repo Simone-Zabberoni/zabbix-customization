@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>4.4</version>
+    <date>2020-04-23T12:18:33Z</date>
+    <media_types>
+        <media_type>
+            <name>Twilio</name>
+            <type>WEBHOOK</type>
+            <parameters>
+                <parameter>
+                    <name>accountsid</name>
+                    <value>YourTwilioAccountSID</value>
+                </parameter>
+                <parameter>
+                    <name>accounttoken</name>
+                    <value>YourTwilioToken</value>
+                </parameter>
+                <parameter>
+                    <name>callerid</name>
+                    <value>YourTwilioCallerid</value>
+                </parameter>
+                <parameter>
+                    <name>msg</name>
+                    <value>{ALERT.SUBJECT}</value>
+                </parameter>
+                <parameter>
+                    <name>sendto</name>
+                    <value>{ALERT.SENDTO}</value>
+                </parameter>
+            </parameters>
+            <script>try {&#13;
+    Zabbix.Log(3, 'Twilio Webhook');&#13;
+&#13;
+    var result = { tags: {} },&#13;
+        params = JSON.parse(value),&#13;
+        req = new CurlHttpRequest(),&#13;
+        fields = {},&#13;
+        postdata = &quot;&quot;,&#13;
+        url = &quot;https://api.twilio.com/2010-04-01/Accounts/&quot; + params.accountsid + &quot;/SMS/Messages.json&quot;;&#13;
+&#13;
+    fields.To = 'To='+ params.sendto;&#13;
+    fields.From = 'From=' + params.callerid;&#13;
+    fields.Body = 'Body=' + params.msg;&#13;
+    postdata = fields.To + &quot;&amp;&quot; + fields.From + &quot;&amp;&quot; + fields.Body;&#13;
+&#13;
+    req.AddHeader('Authorization: Basic ' + btoa(params.accountsid + &quot;:&quot; + params.accounttoken));&#13;
+    &#13;
+    //Zabbix.Log(3, 'URL: ' + url);&#13;
+    //Zabbix.Log(3, 'Post data: ' + postdata);&#13;
+    &#13;
+    var resp = req.Post(url, postdata);&#13;
+&#13;
+    result = JSON.parse(resp);&#13;
+&#13;
+&#13;
+} catch (error) {&#13;
+    Zabbix.Log(3, 'Twilio notification failed : ' + error);&#13;
+    throw 'Twilio notification failed : ' + error;&#13;
+&#13;
+    result = {};&#13;
+}&#13;
+return JSON.stringify(result);</script>
+        </media_type>
+    </media_types>
+</zabbix_export>
