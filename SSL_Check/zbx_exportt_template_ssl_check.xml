@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>4.4</version>
+    <date>2020-04-28T10:40:29Z</date>
+    <groups>
+        <group>
+            <name>Templates</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template SSL Check</template>
+            <name>Template SSL Check</name>
+            <groups>
+                <group>
+                    <name>Templates</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>SSL</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>HTTPS Service running</name>
+                    <type>SIMPLE</type>
+                    <key>net.tcp.service[https,,{$SSL_PORT}]</key>
+                    <delay>5m</delay>
+                    <applications>
+                        <application>
+                            <name>SSL</name>
+                        </application>
+                    </applications>
+                    <valuemap>
+                        <name>Service state</name>
+                    </valuemap>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}=0</expression>
+                            <name>SSL service on {HOST.CONN} is unreachable or not running</name>
+                            <priority>HIGH</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>SSL Certificate Validity</name>
+                    <type>EXTERNAL</type>
+                    <key>zext_ssl_cert.sh[-d,{HOST.CONN},{$SSL_PORT},{$SNI}]</key>
+                    <delay>1d</delay>
+                    <value_type>FLOAT</value_type>
+                    <units>days</units>
+                    <applications>
+                        <application>
+                            <name>SSL</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&lt;=0</expression>
+                            <name>SSL certificate on {HOST.CONN} is expired!</name>
+                            <priority>HIGH</priority>
+                        </trigger>
+                        <trigger>
+                            <expression>{last()}&lt;{$SSL_EXPIRATION_WARNING_DAYS}</expression>
+                            <name>SSL certificate on {HOST.CONN} will expire in {ITEM.LASTVALUE} days</name>
+                            <priority>AVERAGE</priority>
+                            <dependencies>
+                                <dependency>
+                                    <name>SSL certificate on {HOST.CONN} is expired!</name>
+                                    <expression>{Template SSL Check:zext_ssl_cert.sh[-d,{HOST.CONN},{$SSL_PORT},{$SNI}].last()}&lt;=0</expression>
+                                </dependency>
+                            </dependencies>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>SSL Certificate Issuer</name>
+                    <type>EXTERNAL</type>
+                    <key>zext_ssl_cert.sh[-i,{HOST.CONN},{$SSL_PORT},{$SNI}]</key>
+                    <delay>1d</delay>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <applications>
+                        <application>
+                            <name>SSL</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{diff()}=1</expression>
+                            <name>SSL certificate issuer changed on {HOST.CONN}</name>
+                            <priority>WARNING</priority>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+            </items>
+            <macros>
+                <macro>
+                    <macro>{$SSL_EXPIRATION_WARNING_DAYS}</macro>
+                    <value>60</value>
+                </macro>
+                <macro>
+                    <macro>{$SSL_PORT}</macro>
+                    <value>443</value>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+    <graphs>
+        <graph>
+            <name>Certificate validity</name>
+            <graph_items>
+                <graph_item>
+                    <color>1A7C11</color>
+                    <item>
+                        <host>Template SSL Check</host>
+                        <key>zext_ssl_cert.sh[-d,{HOST.CONN},{$SSL_PORT},{$SNI}]</key>
+                    </item>
+                </graph_item>
+            </graph_items>
+        </graph>
+    </graphs>
+    <value_maps>
+        <value_map>
+            <name>Service state</name>
+            <mappings>
+                <mapping>
+                    <value>0</value>
+                    <newvalue>Down</newvalue>
+                </mapping>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>Up</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+    </value_maps>
+</zabbix_export>
