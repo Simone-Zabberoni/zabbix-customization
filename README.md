@@ -8,4 +8,6 @@ Everything works, but use at your own risk ;-)
 
 - [Twilio Integration via webhook](https://github.com/Simone-Zabberoni/zabbix-customization/blob/master/Twilio/README.md)
 - [SSL Checking](https://github.com/Simone-Zabberoni/zabbix-customization/blob/master/SSL_Check/README.md)
+- [Preprocessing stuff](https://github.com/Simone-Zabberoni/zabbix-customization/blob/master/Preprocessing/README.md)
+
 - More to come
